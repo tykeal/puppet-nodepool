@@ -1,5 +1,7 @@
 # nodepool
 
+[![Build Status](https://travis-ci.org/tykeal/puppet-nodepool.png)](https://travis-ci.org/tykeal/puppet-nodepool)
+
 #### Table of Contents
 
 1. [Overview](#overview)
