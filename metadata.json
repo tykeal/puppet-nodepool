@@ -1,0 +1,23 @@
+{
+  "name": "puppet-nodepool",
+  "version": "0.1.0",
+  "author": "tykeal",
+  "summary": "Management for OpenStack Nodepool",
+  "license": "Apache-2.0",
+  "source": "https://github.com/tykeal/puppet-nodepool.git",
+  "project_page": "https://github.com/tykeal/puppet-nodepool",
+  "issues_url": "https://github.com/tykeal/puppet-nodepool/issues",
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [ "7.0" ]
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "puppetlabs-stdlib",
+      "version_requirement": "4.4.x"
+    }
+  ]
+}
+
