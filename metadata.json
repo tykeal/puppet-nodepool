@@ -17,6 +17,14 @@
     {
       "name": "puppetlabs-stdlib",
       "version_requirement": "4.4.x"
+    },
+    {
+      "name": "puppetlabs-vscrepo",
+      "version_requirement": "1.2.x"
+    },
+    {
+      "name": "stankevich-python",
+      "version_requirement": "1.9.1"
     }
   ]
 }
