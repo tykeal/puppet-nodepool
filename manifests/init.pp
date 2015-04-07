@@ -1,41 +1,65 @@
 # == Class: nodepool
 #
-# Full description of class nodepool here.
+# Manages OpenStack nodepool
 #
 # === Parameters
 #
-# Document parameters here.
+# [*manage_python*]
+#   Should the module configure python and virtualenv
 #
-# [*sample_parameter*]
-#   Explanation of what this parameter affects and what it defaults to.
-#   e.g. "Specify one or more upstream ntp servers as an array."
+#   *Type*: boolean
+#
+#   *default*: false
+#
+# [*manage_vcsrepo*]
+#   Should the module manage the vcsrepo call
+#
+#   *Type*: boolean
+#
+#   *default*: true
 #
 # === Variables
 #
-# Here you should define a list of variables that this module would require.
-#
-# [*sample_variable*]
-#   Explanation of how this variable affects the funtion of this class and if
-#   it has a default. e.g. "The parameter enc_ntp_servers must be set by the
-#   External Node Classifier as a comma separated list of hostnames." (Note,
-#   global variables should be avoided in favor of class parameters as
-#   of Puppet 2.6.)
-#
 # === Examples
-#
-#  class { 'nodepool':
-#    servers => [ 'pool.ntp.org', 'ntp.local.company.com' ],
-#  }
 #
 # === Authors
 #
-# Author Name <author@domain.com>
+# Andrew Grimberg <agrimberg@linuxfoundation.org>
 #
 # === Copyright
 #
-# Copyright 2015 Your name here, unless otherwise noted.
+# Copyright 2015 Andrew Grimberg
 #
-class nodepool {
+# === License
+#
+# @License Apache-2.0 <http://spdx.org/licenses/Apache-2.0>
+#
+class nodepool (
+  $manage_python  = $nodepool::params::manage_python,
+  $manage_vcsrepo = $nodepool::params::manage_vcsrepo,
+  $venv_path      = $nodepool::params::venv_path,
+  $vcs_path       = $nodepool::params::vcs_path
+) inherits nodepool::params {
+  # Make sure that all the params are properly formatted
+  validate_bool($manage_python)
+  validate_bool($manage_vcsrepo)
+  validate_absolute_path($venv_path)
+  validate_absolute_path($vcs_path)
 
+  anchor { 'nodepool::begin': }
+  anchor { 'nodepool::end': }
 
+  class { 'nodepool::install':
+    manage_python  => $manage_python,
+    manage_vcsrepo => $manage_vcsrepo,
+  }
+
+  include nodepool::config
+  include nodepool::service
+
+  Anchor['nodepool::begin'] ->
+    Class['nodepool::install'] ->
+    Class['nodepool::config'] ->
+    Class['nodepool::service'] ->
+  Anchor['nodepool::end']
 }
