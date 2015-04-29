@@ -1,6 +1,52 @@
 # == Class: nodepool::install
 #
-# Installs nodepool
+# Installs nodepool into the indicated virtualenv
+#
+# == Parameters
+#
+# [*group*]
+#   The group that nodepool should operate as
+#
+#   *Type*: string
+#
+# [*user*]
+#   The user that nodepool should operate as
+#
+#   *Type*: string
+#
+# [*user_home*]
+#   The home directory for the nodepool user
+#
+#   *Type*: string (absolute path)
+#
+# [*venv_path*]
+#   Fully qualified path to the virtualen that nodepool should be
+#   installed into.
+#
+#   *Type*: string (absolute path)
+#
+# [*vcs_path*]
+#   Fully qualified path to the vcs repo that nodepool will be checked
+#   out into. Nodepool will install into the venv_path using pip
+#
+#   *Type*: string (absolute path)
+#
+# [*vcs_source*]
+#   vcsrepo source path for nodepool.
+#
+#   *Type*: string (vcsrepo URL)
+#
+# [*vcs_type*]
+#   vcsrepo requires a type to be passed to it
+#
+#   *Type*: string
+#
+# [*vcs_revision*]
+#   The only optional parameter. This is the revision that the vcsrepo
+#   configuration will use. The default of undef equates to use the
+#   latest HEAD at all times
+#
+#   *Type*: string
 #
 # === Authors
 #
@@ -15,7 +61,64 @@
 # @License Apache-2.0 <http://spdx.org/licenses/Apache-2.0>
 #
 class nodepool::install (
-  $manage_python,
-  $manage_vcsrepo
+  $group,
+  $user,
+  $user_home,
+  $venv_path,
+  $vcs_path,
+  $vcs_source,
+  $vcs_type,
+  $vcs_revision = undef
 ) {
+  # Make sure params are properly passed
+  validate_string($group)
+  validate_string($user)
+  validate_absolute_path($user_home)
+  validate_absolute_path($venv_path)
+  validate_absolute_path($vcs_path)
+  validate_string($vcs_source)
+  validate_string($vcs_type)
+
+  if ($vcs_revision != undef) {
+    validate_string($vcs_revision)
+  }
+
+  # add the vcsrepo
+  vcsrepo{ $vcs_path:
+    ensure   => present,
+    provider => $vcs_type,
+    source   => $vcs_source,
+    revision => $vcs_revision,
+  }
+
+  # update the virtualenv on changes to the vcsrepo
+  exec { "install nodepool into ${venv_path}":
+    command     => "source ${venv_path}/bin/activate; pip install .",
+    cwd         => $vcs_path,
+    subscribe   => Vcsrepo[$vcs_path],
+    provider    => shell,
+    path        => ['/usr/bin', '/usr/sbin'],
+    refreshonly => true,
+  }
+
+  # setup the user and group
+  group { $group:
+    ensure => present,
+  }
+
+  user { $user:
+    ensure     => present,
+    home       => $user_home,
+    shell      => '/bin/bash',
+    gid        => $group,
+    managehome => true,
+    require    => Group[$group],
+  }
+
+  file { '/etc/nodepool':
+    ensure => directory,
+    owner  => $user,
+    group  => $group,
+    mode   => '0740',
+  }
 }

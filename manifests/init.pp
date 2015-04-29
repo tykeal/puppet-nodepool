@@ -1,24 +1,81 @@
 # == Class: nodepool
 #
-# Manages OpenStack nodepool
+# Manages OpenStack nodepool. It is expected that python build
+# requirements are being managed outside of this module.
 #
 # === Parameters
 #
-# [*manage_python*]
-#   Should the module configure python and virtualenv
+# [*configuration*]
+#   Hash that defines the configuration for nodepool.
+#   This will get written to /etc/nodepool/nodepool.yaml so the hash
+#   will be converted to YAML
 #
-#   *Type*: boolean
+#   *Type*: hash
 #
-#   *default*: false
-#
-# [*manage_vcsrepo*]
-#   Should the module manage the vcsrepo call
-#
-#   *Type*: boolean
-#
-#   *default*: true
-#
+#   *default*: none - this is a required parameter
+# 
 # === Variables
+#
+# [*group*]
+#   The group that nodepool should operate as
+#
+#   *Type*: string
+#
+#   *default*: nodepool
+#
+# [*user*]
+#   The user that nodepool should operate as
+#
+#   *Type*: string
+#
+#   *default*: nodepool
+#
+# [*user_home*]
+#   The home directory for the nodepool user
+# 
+#   *Type*: string (absolute path)
+#
+#   *default*: /home/nodepool
+#
+# [*venv_path*]
+#   Fully qualified path to the virtualenv that nodepool should be
+#   installed into. The virtualenv is not managed by this module. It is
+#   recommend that a module such as stankevich/python be used to manage
+#   in a virtualenv
+#
+#   *Type*: string (absolute path)
+#
+#   *default*: /opt/venv-nodepool
+#
+# [*vcs_path*]
+#   Fully qualified path to the vcs repo that nodepool will be checked
+#   out into. Nodepool will utilize the virtualenv to execute a pip
+#   install out of this vcsrepo
+#
+#   *Type*: string (absolute path)
+#
+#   *default*: /opt/vcs-nodepool
+#
+# [*vcs_source*]
+#   vcsrepo source path for nodepool.
+#
+#   *Type*: string (vcsrepo URL)
+#
+#   *default*: GitHub nodepool repo from OpenStack
+#
+# [*vcs_type*]
+#   vcsrepo requires a type to be passed to it
+#
+#   *Type*: string
+#
+#   *default*: git
+#
+# [*vcs_revision*]
+#   Revision to pass to the vcsrepo configuration
+#
+#   *Type*: string
+#
+#   *default*: undef (aka use latest HEAD)
 #
 # === Examples
 #
@@ -35,26 +92,50 @@
 # @License Apache-2.0 <http://spdx.org/licenses/Apache-2.0>
 #
 class nodepool (
-  $manage_python  = $nodepool::params::manage_python,
-  $manage_vcsrepo = $nodepool::params::manage_vcsrepo,
+  $configuration,
+  $group          = $nodepool::params::group,
+  $user           = $nodepool::params::user,
+  $user_home      = $nodepool::params::user_home,
   $venv_path      = $nodepool::params::venv_path,
-  $vcs_path       = $nodepool::params::vcs_path
+  $vcs_path       = $nodepool::params::vcs_path,
+  $vcs_source     = $nodepool::params::vcs_source,
+  $vcs_type       = $nodepool::params::vcs_type,
+  $vcs_revision   = undef
 ) inherits nodepool::params {
   # Make sure that all the params are properly formatted
-  validate_bool($manage_python)
-  validate_bool($manage_vcsrepo)
+  validate_hash($configuration)
+  validate_string($group)
+  validate_string($user)
+  validate_absolute_path($user_home)
   validate_absolute_path($venv_path)
   validate_absolute_path($vcs_path)
+  validate_string($vcs_source)
+  validate_string($vcs_type)
+
+  if ($vcs_revision != undef) {
+    validate_string($vcs_revision)
+  }
 
   anchor { 'nodepool::begin': }
   anchor { 'nodepool::end': }
 
   class { 'nodepool::install':
-    manage_python  => $manage_python,
-    manage_vcsrepo => $manage_vcsrepo,
+    group        => $group,
+    user         => $user,
+    user_home    => $user_home,
+    venv_path    => $venv_path,
+    vcs_path     => $vcs_path,
+    vcs_source   => $vcs_source,
+    vcs_type     => $vcs_type,
+    vcs_revision => $vcs_revision,
   }
 
-  include nodepool::config
+  class { 'nodepool::config':
+    configuration => $configuration,
+    group         => $group,
+    user          => $user,
+  }
+
   include nodepool::service
 
   Anchor['nodepool::begin'] ->

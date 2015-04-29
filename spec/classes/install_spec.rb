@@ -1,40 +1,33 @@
 require 'spec_helper'
 
-describe 'nodepool', :type => :class do
+describe 'nodepool::install', :type => :class do
+  # set some default good params so we can override with bad ones in
+  # test
+  let(:params) {
+    {
+      'group'      => 'nodepool',
+      'user'       => 'nodepool',
+      'user_home'  => '/home/nodepool',
+      'venv_path'  => '/opt/venv-nodepool',
+      'vcs_path'   => '/opt/vcs-nodepool',
+      'vcs_source' => 'https://github.com/openstack-infra/nodepool.git',
+      'vcs_type'   => 'git',
+    }
+  }
 
+  # we do not have default values so the class should fail compile
   context 'with defaults for all parameters' do
-    it 'should fail due to missing configuration hash' do
-      expect { should compile }.to \
-        raise_error(RSpec::Expectations::ExpectationNotMetError,
-          /Must pass configuration/)
+    let(:params) {{}}
+
+    it do
+      expect {
+        should compile
+      }.to raise_error(RSpec::Expectations::ExpectationNotMetError,
+        /Must pass group/)
     end
   end
 
-  context 'with a configuration hash defined and default parameters' do
-    let(:params) {
-      {
-        'configuration' => {
-        }
-      }
-    }
-
-    it { should contain_class('nodepool') }
-    it { should contain_class('nodepool::params') }
-    it { should contain_anchor('nodepool::begin') }
-    it { should contain_class('nodepool::install') }
-    it { should contain_class('nodepool::config') }
-    it { should contain_class('nodepool::service') }
-    it { should contain_anchor('nodepool::end') }
-  end
-
-  context 'with a configuration hash defined and bad parameters' do
-    let(:params) {
-      {
-        'configuration' => {
-        }
-      }
-    }
-
+  context 'with bad parameters' do
     it 'should fail on bad group' do
       params.merge!({'group' => false})
       expect { should compile }.to \
@@ -91,6 +84,41 @@ describe 'nodepool', :type => :class do
           /true is not a string/)
     end
   end
+
+  # actual validation tests for what the class should produce
+  context 'with good parameters' do
+    it { should contain_vcsrepo('/opt/vcs-nodepool').with(
+      'ensure'   => 'present',
+      'provider' => 'git',
+      'source'   => 'https://github.com/openstack-infra/nodepool.git',
+    ) }
+
+    it { should contain_exec('install nodepool into /opt/venv-nodepool').with(
+      'command'     => 'source /opt/venv-nodepool/bin/activate; pip install .',
+      'cwd'         => '/opt/vcs-nodepool',
+      'provider'    => 'shell',
+      'refreshonly' => true,
+      'path'        => ['/usr/bin', '/usr/sbin'],
+    ) }
+
+    it { should contain_group('nodepool') }
+
+    it { should contain_user('nodepool').with(
+      'ensure'     => 'present',
+      'home'       => '/home/nodepool',
+      'shell'      => '/bin/bash',
+      'gid'        => 'nodepool',
+      'managehome' => true,
+    ) }
+
+    it { should contain_file('/etc/nodepool').with(
+      'ensure' => 'directory',
+      'owner'  => 'nodepool',
+      'group'  => 'nodepool',
+      'mode'   => '0740',
+    ) }
+  end
 end
 
 # vim: sw=2 ts=2 sts=2 et :
+

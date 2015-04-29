@@ -1,6 +1,6 @@
 # == Class: nodepool::config
 #
-# Installs nodepool
+# Configures nodepool
 #
 # === Authors
 #
@@ -15,5 +15,12 @@
 # @License Apache-2.0 <http://spdx.org/licenses/Apache-2.0>
 #
 class nodepool::config (
+  $configuration,
+  $group,
+  $user
 ) {
+  # Make sure the params are properly formatted
+  validate_hash($configuration)
+  validate_string($group)
+  validate_string($user)
 }

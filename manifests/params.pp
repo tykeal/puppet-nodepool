@@ -15,8 +15,11 @@
 # @License Apache-2.0 <http://spdx.org/licenses/Apache-2.0>
 #
 class nodepool::params {
-  $manage_python = false
-  $manage_vcsrepo = true
-  $venv_path = '/opt/venv-nodepool'
-  $vcs_path = '/opt/vcs-nodepool'
+  $group      = 'nodepool'
+  $user       = 'nodepool'
+  $user_home  = '/home/nodepool'
+  $venv_path  = '/opt/venv-nodepool'
+  $vcs_path   = '/opt/vcs-nodepool'
+  $vcs_source = 'https://github.com/openstack-infra/nodepool.git'
+  $vcs_type   = 'git'
 }
