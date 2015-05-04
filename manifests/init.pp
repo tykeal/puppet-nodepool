@@ -93,17 +93,19 @@
 #
 class nodepool (
   $configuration,
-  $group          = $nodepool::params::group,
-  $user           = $nodepool::params::user,
-  $user_home      = $nodepool::params::user_home,
-  $venv_path      = $nodepool::params::venv_path,
-  $vcs_path       = $nodepool::params::vcs_path,
-  $vcs_source     = $nodepool::params::vcs_source,
-  $vcs_type       = $nodepool::params::vcs_type,
-  $vcs_revision   = undef
+  $configuration_file = $nodepool::params::configuration_file,
+  $group              = $nodepool::params::group,
+  $user               = $nodepool::params::user,
+  $user_home          = $nodepool::params::user_home,
+  $venv_path          = $nodepool::params::venv_path,
+  $vcs_path           = $nodepool::params::vcs_path,
+  $vcs_source         = $nodepool::params::vcs_source,
+  $vcs_type           = $nodepool::params::vcs_type,
+  $vcs_revision       = undef
 ) inherits nodepool::params {
   # Make sure that all the params are properly formatted
   validate_hash($configuration)
+  validate_absolute_path($configuration_file)
   validate_string($group)
   validate_string($user)
   validate_absolute_path($user_home)
@@ -131,9 +133,10 @@ class nodepool (
   }
 
   class { 'nodepool::config':
-    configuration => $configuration,
-    group         => $group,
-    user          => $user,
+    configuration      => $configuration,
+    configuration_file => $configuration_file,
+    group              => $group,
+    user               => $user,
   }
 
   include nodepool::service

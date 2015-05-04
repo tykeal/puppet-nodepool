@@ -35,6 +35,13 @@ describe 'nodepool', :type => :class do
       }
     }
 
+    it 'should fail on bad configuration_file' do
+      params.merge!({'configuration_file' => 'badvalue'})
+      expect { should compile }.to \
+        raise_error(RSpec::Expectations::ExpectationNotMetError,
+          /"badvalue" is not an absolute path/)
+    end
+
     it 'should fail on bad group' do
       params.merge!({'group' => false})
       expect { should compile }.to \
