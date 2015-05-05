@@ -1,18 +1,22 @@
 fixtures:
   # use the forge modules so we can easily pin to a specific version
-#  forge_modules:
+  forge_modules:
 #    stdlib: "puppetlabs/stdlib"
 #    vscrepo:
 #      repo: "puppetlabs/vcsrepo"
 #      ref: "1.2.0"
+    python:
+      repo: "stankevich/python"
+      ref: "1.9.1"
+
   repositories:
     stdlib: "git://github.com/puppetlabs/puppetlabs-stdlib.git"
     #vscrepo: "https://github.com/puppetlabs/puppetlabs-vcsrepo"
     # use my personal fork of puppetlabs-vcsrepo for now to avoid lint
     # warnings
     vcsrepo: "git://github.com/tykeal/puppetlabs-vcsrepo.git"
-    python:
-      repo: "git@github.com:stankevich/puppet-python.git"
-      ref: "1.9.1"
+#    python:
+#      repo: "git@github.com:stankevich/puppet-python.git"
+#      ref: "1.9.1"
   symlinks:
     nodepool: "#{source_dir}"
