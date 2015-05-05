@@ -31,6 +31,6 @@ class nodepool::config (
     owner   => $user,
     group   => $group,
     mode    => '0644',
-    content => inline_template("<%= @configuration.to_yaml %>"),
+    content => inline_template('<%= @configuration.to_yaml %>'),
   }
 }
