@@ -16,4 +16,10 @@
 #
 class nodepool::service (
 ) {
+  service { 'nodepool':
+    ensure     => running,
+    enable     => true,
+    hasrestart => true,
+    hasstatus  => true,
+  }
 }
