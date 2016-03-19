@@ -16,21 +16,11 @@
 #
 class nodepool::params {
   $configuration_file = '/etc/nodepool/nodepool.yaml'
-
-  # user configuration
-  $user      = 'nodepool'
-  $group     = $user
-  $user_home = "/home/${user}"
-
-  # virtualenv info
-  $venv_path = '/opt/venv-nodepool'
-
-  # installation picker
-  $install_via = 'pip'
-
-  # vcs info
-  $vcs_path   = '/opt/vcs-nodepool'
-  $vcs_source = 'https://github.com/openstack-infra/nodepool.git'
-  $vcs_type   = 'git'
-  $vcs_ref    = undef
+  $group              = 'nodepool'
+  $user               = 'nodepool'
+  $user_home          = '/home/nodepool'
+  $venv_path          = '/opt/venv-nodepool'
+  $vcs_path           = '/opt/vcs-nodepool'
+  $vcs_source         = 'https://github.com/openstack-infra/nodepool.git'
+  $vcs_type           = 'git'
 }

@@ -2,15 +2,6 @@
 #
 # Configures nodepool
 #
-# === Variables
-#
-# [*configuration*]
-#   Hash that defines the configuration for nodepool.
-#   This will get written to /etc/nodepool/nodepool.yaml so the hash
-#   will be converted to YAML
-#
-#   *Type*: hash
-#
 # === Authors
 #
 # Andrew Grimberg <agrimberg@linuxfoundation.org>

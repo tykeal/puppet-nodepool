@@ -61,42 +61,45 @@
 # @License Apache-2.0 <http://spdx.org/licenses/Apache-2.0>
 #
 class nodepool::install (
-  Enum['pip', 'vcs'] $install_via,
-  String $pip_package,
-  String $pip_version,
-  String $group,
-  String $user,
-  String $user_home,
-  String $venv_path,
-  String $vcs_path,
-  String $vcs_source,
-  String $vcs_type,
-  Optional[String] $vcs_revision,
+  $group,
+  $user,
+  $user_home,
+  $venv_path,
+  $vcs_path,
+  $vcs_source,
+  $vcs_type,
+  $vcs_revision = undef
 ) {
   # Make sure params are properly passed
+  validate_string($group)
+  validate_string($user)
   validate_absolute_path($user_home)
+  validate_absolute_path($venv_path)
+  validate_absolute_path($vcs_path)
+  validate_string($vcs_source)
+  validate_string($vcs_type)
 
   if ($vcs_revision != undef) {
     validate_string($vcs_revision)
   }
 
-#  # add the vcsrepo
-#  vcsrepo{ $vcs_path:
-#    ensure   => present,
-#    provider => $vcs_type,
-#    source   => $vcs_source,
-#    revision => $vcs_revision,
-#  }
-#
-#  # update the virtualenv on changes to the vcsrepo
-#  exec { "install nodepool into ${venv_path}":
-#    command     => "source ${venv_path}/bin/activate; pip install .",
-#    cwd         => $vcs_path,
-#    subscribe   => Vcsrepo[$vcs_path],
-#    provider    => shell,
-#    path        => ['/usr/bin', '/usr/sbin'],
-#    refreshonly => true,
-#  }
+  # add the vcsrepo
+  vcsrepo{ $vcs_path:
+    ensure   => present,
+    provider => $vcs_type,
+    source   => $vcs_source,
+    revision => $vcs_revision,
+  }
+
+  # update the virtualenv on changes to the vcsrepo
+  exec { "install nodepool into ${venv_path}":
+    command     => "source ${venv_path}/bin/activate; pip install .",
+    cwd         => $vcs_path,
+    subscribe   => Vcsrepo[$vcs_path],
+    provider    => shell,
+    path        => ['/usr/bin', '/usr/sbin'],
+    refreshonly => true,
+  }
 
   # setup the user and group
   group { $group:

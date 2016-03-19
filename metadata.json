@@ -23,7 +23,7 @@
       "version_requirement": ">=4.4.0 <5.0.0"
     },
     {
-      "name": "puppetlabs-vcsrepo",
+      "name": "puppetlabs-vscrepo",
       "version_requirement": ">=1.2.0 <2.0.0"
     },
     {
